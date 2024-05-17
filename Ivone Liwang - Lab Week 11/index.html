@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Manipulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 2.5em;
+            color: #4682b4;
+        }
+
+        .shapeContainerWrapper {
+            width: 80%;
+            height: 500px;
+            padding: 20px;
+            border: 2px solid #4682b4;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .shapeContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shape {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            transition: transform 0.3s;
+        }
+
+        .shape:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .square {
+            background-color: red;
+        }
+
+        .circle {
+            background-color: red;
+            border-radius: 50%;
+        }
+
+        .rectangle {
+            background-color: red;
+            height: 30px;
+        }
+
+        .diamond {
+            background-color: red;
+            transform: rotate(45deg);
+            margin: 5px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .controls button {
+            background-color: #4682b4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: #5a9bd3;
+        }
+
+        .shapeControls {
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        .shapeControls label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .shapeControls select,
+        .shapeControls input {
+            padding: 5px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shape Manipulator</h1>
+    <div class="shapeContainerWrapper">
+        <div class="shapeContainer"></div>
+    </div>
+    <div class="controls">
+        <button id="addShape">Add Shape</button>
+        <button id="removeShape">Remove Shape</button>
+        <div class="shapeControls">
+            <label for="shapeType">Shape:</label>
+            <select id="shapeType">
+                <option value="square">Square</option>
+                <option value="circle">Circle</option>
+                <option value="rectangle">Rectangle</option>
+                <option value="diamond">Diamond</option>
+            </select>
+            <label for="shapeColor">Color:</label>
+            <input type="color" id="shapeColor" value="#ff0000">
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let containerWidth = $('.shapeContainer').width();
+            let shapeSize = 50;
+            let shapeSpacing = 10;
+            let currentX = 0;
+            let currentY = 0;
+            let isAnimating = false;
+
+            function createShape(type, color) {
+                let shape = $('<div class="shape"></div>');
+                shape.addClass(type);
+                shape.css('background-color', color);
+                shape.css({
+                    top: currentY + 'px',
+                    left: '-60px', // Start from outside the container for slide-in effect
+                });
+                return shape;
+            }
+
+            function updatePositionVariables() {
+                currentX += shapeSize + shapeSpacing;
+                if (currentX + shapeSize + shapeSpacing > containerWidth) {
+                    currentX = 0;
+                    currentY += shapeSize + shapeSpacing;
+                }
+            }
+
+            $('#addShape').click(function () {
+                if (isAnimating) return;
+
+                isAnimating = true;
+                let shapeType = $('#shapeType').val();
+                let shapeColor = $('#shapeColor').val();
+                let shape = createShape(shapeType, shapeColor);
+                $('.shapeContainer').append(shape);
+                shape.animate({ left: currentX + 'px' }, 500, function () {
+                    isAnimating = false;
+                });
+                updatePositionVariables();
+            });
+
+            $('#removeShape').click(function () {
+                if (isAnimating) return;
+
+                let shapes = $('.shape');
+                if (shapes.length === 0) return;
+
+                isAnimating = true;
+                let lastShape = shapes.last();
+                lastShape.fadeOut(500, function () {
+                    lastShape.remove();
+                    currentX -= shapeSize + shapeSpacing;
+                    if (currentX < 0 && currentY > 0) {
+                        currentX = containerWidth - (shapeSize + shapeSpacing);
+                        currentY -= shapeSize + shapeSpacing;
+                    }
+                    isAnimating = false;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
